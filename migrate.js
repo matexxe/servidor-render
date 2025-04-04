@@ -49,6 +49,35 @@ app.get("/song/:fileName", async (req, res) => {
   }
 });
 
+// Ruta para listar todas las canciones disponibles
+app.get("/songs", async (req, res) => {
+  try {
+    const authClient = await auth.getClient();
+
+    const list = await drive.files.list({
+      q: `'${process.env.GOOGLE_DRIVE_FOLDER_ID}' in parents and trashed=false`,
+      fields: "files(id, name)",
+      auth: authClient,
+    });
+
+    if (!list.data.files.length) {
+      return res.status(404).json({ message: "No se encontraron canciones." });
+    }
+
+    const songs = list.data.files.map((file) => ({
+      name: file.name,
+      url: `${req.protocol}://${req.get("host")}/song/${encodeURIComponent(
+        file.name
+      )}`,
+    }));
+
+    res.json(songs);
+  } catch (error) {
+    console.error("❌ Error al obtener las canciones:", error);
+    res.status(500).json({ message: "Error al obtener las canciones" });
+  }
+});
+
 // Iniciar servidor
 app.listen(PORT, () => {
   console.log(`🚀 Servidor escuchando en http://localhost:${PORT}`);
