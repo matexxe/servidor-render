@@ -1,0 +1,9 @@
+# Ignorar dependencias locales
+node_modules/
+
+# Ignorar archivos de configuración sensibles
+.env
+google-credentials.json
+
+# Ignorar descargas temporales
+downloads/
